@@ -1,0 +1,14 @@
+Material	Life	Smoothness
+
+brick 2 2
+concrete 3 2
+concrete2 4 3
+glass 1 1
+marble 2 4
+metal 2 1
+metal2 3 2
+metal3 4 3
+metal4 5 1
+rock 3 3
+rock2 4 4
+wood 1 3
