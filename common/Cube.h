@@ -50,12 +50,6 @@ public:
 	GLuint UVsVBO;
 	GLuint NormsVBO;
 
-	// used to send Reflaction data to the GPU
-	GLuint reflectVAO;
-	GLuint reflectVertsVBO;
-	GLuint reflectUVsVBO;
-	GLuint reflectNormsVBO;
-
 //****************	F U N C T I O N S	****************
 
 	// Load the . obj file and the .jpg file
@@ -87,33 +81,6 @@ public:
 		// vertex VBO
 		glGenBuffers(1, &VertsVBO);
 		glBindBuffer(GL_ARRAY_BUFFER, VertsVBO);
-		glBufferData(GL_ARRAY_BUFFER, Verts.size() * sizeof(glm::vec3), &Verts[0], GL_STATIC_DRAW);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-		glEnableVertexAttribArray(0);
-
-		// normals VBO
-		glGenBuffers(1, &NormsVBO);
-		glBindBuffer(GL_ARRAY_BUFFER, NormsVBO);
-		glBufferData(GL_ARRAY_BUFFER, Norms.size() * sizeof(glm::vec3), &Norms[0], GL_STATIC_DRAW);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-		glEnableVertexAttribArray(1);
-
-		// uvs VBO
-		glGenBuffers(1, &UVsVBO);
-		glBindBuffer(GL_ARRAY_BUFFER, UVsVBO);
-		glBufferData(GL_ARRAY_BUFFER, UVs.size() * sizeof(glm::vec2), &UVs[0], GL_STATIC_DRAW);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-		glEnableVertexAttribArray(2);
-	}
-
-	void BindReflections()
-	{
-		glGenVertexArrays(1, &reflectVAO);
-		glBindVertexArray(reflectVAO);
-
-		// vertex VBO
-		glGenBuffers(1, &reflectVertsVBO);
-		glBindBuffer(GL_ARRAY_BUFFER, reflectVertsVBO);
 		glBufferData(GL_ARRAY_BUFFER, Verts.size() * sizeof(glm::vec3), &Verts[0], GL_STATIC_DRAW);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 		glEnableVertexAttribArray(0);

@@ -97,9 +97,11 @@ public:
 		// cube type
 		int Type;
 		// cube remaining life
-		int Life;
+		float Life;
 		// cube smoothness
 		int Smoothness;
+		// cube extra
+		int ExtraID = -1;
 	};
 
 	vector<CubeSpecs> cbsSpecs;
@@ -108,6 +110,11 @@ public:
 	// minx, maxx, miny, maxy, minz, maxz
 	float BoxLimits[6] = { 0 };
 
+	// Number of Collisions between the ball and the cubes
+	// used to compute the score
+	int Collisions = 0;
+	//
+	int NoBrickCollissions = 0;
 	//	**********	F U N C T I O N S	**********
 
 	//	This function generates the position for every brick in the game. 
@@ -147,6 +154,26 @@ public:
 			DeletedElement.push_back(tmp0);
 		}
 
+		// Random choose extra location
+		int MaxExtras = 0.2 * cbsSpecs.size();
+		vector<int> ExtrasOldPos;
+		while (ExtrasOldPos.size() < MaxExtras)
+		{
+			int ExtraPos = rand() % cbsSpecs.size();
+			bool ExtraPosExists = false;
+			for (int i = 0; i < ExtrasOldPos.size(); i++)
+			{
+				if (ExtraPos == ExtrasOldPos[i])
+					ExtraPosExists = true;
+			}
+			if (!ExtraPosExists)
+			{
+				ExtrasOldPos.push_back(ExtraPos);
+				int ExtraID = rand() % 5;
+				cbsSpecs[ExtraPos].ExtraID = ExtraID;
+			}
+
+		}
 	//	cout << " cubes created " << endl;
 	//	cout << DeletedElement[0][0].size() << " " << DeletedElement[0].size() << " " << DeletedElement.size() << endl;
 	//	cout << cbsSpecs.size() << endl;
@@ -162,26 +189,53 @@ public:
 	{
 		//cout << pos.z << " " << BoxLimits[5] << " " << speed.x << " " << speed.y << " " << speed.z << endl;
 		bool EndGame = false;
-
-		if (pos.x + r >= BoxLimits[1])			// collision with the right wall
-			speed = reflect(speed, vec3(-1.0f, 0.0f, 0.0f));
-		else if ((pos.x - r <= BoxLimits[0]))	// collision with the left wall
-			speed = reflect(speed, vec3(1.0f, 0.0f, 0.0f));
-		else if ((pos.y + r >= BoxLimits[3]))	// collision with the top wall
-			speed = reflect(speed, vec3(0.0f, -1.0f, 0.0f));
-		else if ((pos.y - r <= BoxLimits[2]))	// collision with the bottom wall
-			speed = reflect(speed, vec3(0.0f, 1.0f, 0.0f));
-		else if ((pos.z - r <= BoxLimits[4]))	// collision with the front wall
-			speed = reflect(speed, vec3(0.0f, 0.0f, 1.0f));
-		else if ((pos.z > 0.8 * BoxLimits[5]))		// collision with the wall behind
+		
+		if ((0.5 * pos.x < BoxLimits[0]) || (0.5 * pos.x > BoxLimits[1]) ||
+			(0.5 * pos.y < BoxLimits[2]) || (0.5 * pos.y > BoxLimits[3]) ||
+			(0.5 * pos.z + r < BoxLimits[4]) || (0.5 * pos.z > BoxLimits[5]))
+		{
 			EndGame = true;
-
+			cout << BoxLimits[0] << " " << BoxLimits[2] << " " << BoxLimits[5] << endl;
+			cout << pos.x << " " << pos.y << " " << pos.y << endl;
+		}
+		else if (pos.x + r >= BoxLimits[1])			// collision with the right wall
+		{
+			speed = reflect(speed, vec3(-1.0f, 0.0f, 0.0f));
+			NoBrickCollissions++;
+		}
+		else if ((pos.x - r <= BoxLimits[0]))	// collision with the left wall
+		{
+			speed = reflect(speed, vec3(1.0f, 0.0f, 0.0f));
+			NoBrickCollissions++;
+		}
+		else if ((pos.y + r >= BoxLimits[3]))	// collision with the top wall
+		{
+			speed = reflect(speed, vec3(0.0f, -1.0f, 0.0f));
+			NoBrickCollissions++;
+		}
+		else if ((pos.y - r <= BoxLimits[2]))	// collision with the bottom wall
+		{
+			speed = reflect(speed, vec3(0.0f, 1.0f, 0.0f));
+			NoBrickCollissions++;
+		}
+		else if ((pos.z - 1.5 * r <= BoxLimits[4]))	// collision with the front wall
+		{
+			speed = reflect(speed, vec3(0.0f, 0.0f, 1.0f));
+			NoBrickCollissions++;
+		}
+		else if ((pos.z > 0.7 * BoxLimits[5]))	// collision with the wall behind
+			EndGame = true;
+		/*if (NoBrickCollissions > 20)
+		{
+			EndGame = true;
+		}*/
+		speed = normalize(speed);
 		return EndGame;
 	}
 
 	// This function checks if a ball collided with the  
 	// board and if so it computes the new speed
-	void BallBoardCollision(float r, vec3 pos, vec3 &speed, float boardLimits[6], vec3 boardNorm)
+	void BallBoardCollision(float r, vec3 pos, vec3 &speed, float boardLimits[6], vec3 boardNorm, bool StickyBoard, int reflectType)
 	{
 		//	cout << pos.x + r << " " << boardLimits[0] << " - " << boardLimits[1] << " y " << pos.y + r << " " << boardLimits[2] << " - " << boardLimits[3] << " z " << pos.z + r << " " << boardLimits[4] << " - " << boardLimits[5] << endl;
 
@@ -190,7 +244,27 @@ public:
 		bool z_axis_check = (boardLimits[4] == boardLimits[5]) ? (pos.z + r >= boardLimits[4] && pos.z - r <= boardLimits[4]) : (pos.z + r <= boardLimits[5]) && (pos.z - r >= boardLimits[4]);
 
 		if (x_axis_check && y_axis_check && z_axis_check)
-			speed = -speed;
+		{
+			if (!StickyBoard)
+			{
+				if (reflectType == 1)
+					speed = -speed;
+				else if (reflectType == 2)
+					speed = reflect(speed, boardNorm);
+				else if (reflectType == 3)
+				{
+					// convert to a sphere like coordinate system
+					float x_pos = (pos.x + abs(boardLimits[0])) / (abs(boardLimits[0]) + abs(boardLimits[1]));
+					float y_pos = (pos.y + abs(boardLimits[2])) / (abs(boardLimits[2]) + abs(boardLimits[3]));
+					float th = y_pos * 3.14f;
+					float phi = x_pos * 2 * 3.14f;
+					speed = normalize(vec3(sin(th) * cos(phi), sin(th) * sin(phi), cos(th)));
+				}
+				NoBrickCollissions++;
+			}
+			else
+				speed = vec3(0);
+		}
 	}
 
 	// This function handles the collisions between the cubes and the ball
@@ -365,7 +439,17 @@ public:
 					int xn = MinIndex % (2 * NumxCubes + 1);
 					DeletedElement[zn][yn][xn] = true;
 				}
+				// update the score
+				Collisions++;
+				NoBrickCollissions = 0;
 			}
 		}	
+	}
+
+	// This function deletes the old Grid
+	void DeleteGrid()
+	{
+		cbsSpecs.clear();
+		DeletedElement.clear();
 	}
 };

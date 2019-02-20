@@ -198,7 +198,7 @@ public:
 	// Draw char
 	void Draw(int index, mat4 M)
 	{
-		glUniform1i(EnPhLightLoc, 1);
+	//	glUniform1i(EnPhLightLoc, 1);
 		UVs = Chars[index].UVs;
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, UVsVBO);

@@ -6,8 +6,7 @@ in vec3 vertex_position_cameraspace;
 in vec3 vertex_normal_cameraspace;
 in vec2 vertex_UV;
 
-uniform int useTexture;
-uniform int EnablePhong = 1;
+uniform int useTexture = 1;
 uniform sampler2D diffuseColorSampler;
 uniform sampler2D specularColorSampler;
 uniform sampler2DShadow shadowMapSampler;
@@ -19,8 +18,8 @@ struct Light {
     vec4 La;
     vec4 Ld;
     vec4 Ls;
-    vec3 lightPosition_worldspace;
-    float power;
+    mat4 SideLightPosition;
+	vec4 FrontLightPosition;
 };
 uniform Light light;
 
@@ -36,22 +35,27 @@ uniform Material mtl;
 // Output data
 out vec4 fragmentColor;
 
-void phong();
+vec4 phong(vec4 LightPos, float power);
 
-void main() {
-	if (EnablePhong == 1)
-		phong();
-	else
-	{
-		fragmentColor = vec4(texture(diffuseColorSampler, vertex_UV).rgb, 1.0);
-		if (fragmentColor.x != 0)
-			discard;
+void main() 
+{
+	vec4 col = vec4(0);
+	vec4 Pos = vec4(0);
+	for (int i = 0; i < 4 ; i++)
+	{	
+		Pos = vec4(light.SideLightPosition[i][0], light.SideLightPosition[i][1], light.SideLightPosition[i][2], 1.0);
+		col += phong(Pos, light.SideLightPosition[i][3]);
 	}
+	Pos = vec4(light.FrontLightPosition[0], light.FrontLightPosition[1], light.FrontLightPosition[2], 1.0);
+    col += phong(Pos, light.FrontLightPosition[3]);
+	fragmentColor = 0.2f * col;
 }
 
 
 
-void phong() {
+vec4 phong(vec4 LightPos, float power)
+{
+	vec4 col;
     vec4 _Ks = mtl.Ks;
     vec4 _Kd = mtl.Kd;
     vec4 _Ka = mtl.Ka;
@@ -59,7 +63,6 @@ void phong() {
     // use texture for materials
     if (useTexture == 1) {
         _Ks = vec4(.1, .1, .1, .1);
-		_Ks = vec4(texture(diffuseColorSampler, vertex_UV).rgb, 1.0);
         _Kd = vec4(texture(diffuseColorSampler, vertex_UV).rgb, 1.0);
         _Ka = vec4(0.1, 0.1, 0.1, 1.0);
         _Ns = 10;
@@ -70,8 +73,8 @@ void phong() {
 
     // model diffuse intensity (Id)
     vec3 N = normalize(vertex_normal_cameraspace); 
-    vec3 L = normalize((V * vec4(light.lightPosition_worldspace, 1)).xyz - vertex_position_cameraspace);
-    float cosTheta = clamp(dot(L, N), 0, 1);
+    vec3 L = normalize((V * LightPos).xyz - vertex_position_cameraspace);
+	float cosTheta = clamp(dot(L, N), 0, 1);
     vec4 Id = light.Ld * _Kd * cosTheta; 
 
     // model specular intensity (Is)
@@ -80,19 +83,16 @@ void phong() {
     float cosAlpha = clamp(dot(E, R), 0, 1);
     float specular_factor = pow(cosAlpha, _Ns);
     vec4 Is = light.Ls * _Ks * specular_factor;
-/*
-	// Blinn-Phong model specular light
-	vec3 H = normalize(L + E);
-	float spec = pow(max(dot(N, H), 0.0), _Ns);
-	Is = light.Ls * _Ks * spec;
-	*/
+
     //model the light distance effect
-    float distance = length(light.lightPosition_worldspace - vertex_position_worldspace);
+    float distance = length(LightPos.xyz - vertex_position_worldspace);
     float distance_sq = distance * distance;
 
     // final fragment color
-    fragmentColor = vec4(
+    col = vec4(
         Ia + 
-        Id * light.power / distance_sq + 
-        Is * light.power / distance_sq);
+        Id * power / distance_sq + 
+        Is * power / distance_sq);
+
+	return col;
 }

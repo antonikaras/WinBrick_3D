@@ -18,12 +18,12 @@ uniform mat4 M;
 
 void main()
 {
+
 	vec4 vertexPositionNew_modelspace = vec4(vertexPosition_modelspace, 1.0);
     vec4 vertexNormalNew_modelspace = vec4(vertexNormal_modelspace, 0.0);
 
 	// vertex position
     gl_Position =  P * V * M * vertexPositionNew_modelspace;
-    gl_PointSize = 10;
 
     // FS
     vertex_position_worldspace = (M * vertexPositionNew_modelspace).xyz;

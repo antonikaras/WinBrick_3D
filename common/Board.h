@@ -104,7 +104,8 @@ public:
 
 	void update()
 	{
-		if (BoardLevel < 5)
+		vec3 tmp_s = S;
+		if (BoardLevel < 1.5)
 			S = (S) * BoardLevel;
 		
 		M = translate(mat4(), Pos) * scale(mat4(), S);	// transformation matrix
@@ -120,6 +121,8 @@ public:
 		BoardLimits[3] = (M * vec4(Verts[1], 1)).y;
 		BoardLimits[4] = (M * vec4(Verts[0], 1)).z;
 		BoardLimits[5] = (M * vec4(Verts[3], 1)).z;
+
+		S = tmp_s;
 	};
 
 	void Bind()

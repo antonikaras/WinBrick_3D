@@ -50,12 +50,9 @@ include_directories(
     external/Simple-OpenGL-Image-Library/include/
     external/tinyxml2/include/
     external/tinyobjloader/include/
-	external/glut-3.7.6/adainclude/
-	external/glut-3.7.6/include/
     .
 )
 
-link_directories(external/glut-3.7.6/lib/)
 
 set(ALL_LIBS
     ${OPENGL_LIBRARY}
@@ -76,14 +73,12 @@ add_definitions(
 ###############################################################################
 # winbrick
 add_executable(winbrick 
-    winbrick/winbrick_ver8.cpp
+    winbrick/winbrick_ver11.cpp
     
     common/util.cpp
     common/util.h
     common/shader.cpp
     common/shader.h
-    common/camera.cpp
-    common/camera.h
     common/ModelLoader.cpp
     common/ModelLoader.h
     common/texture.cpp
@@ -95,7 +90,8 @@ add_executable(winbrick
 	common/GameGrid_ver2.h
 	common/Fonts.h
 	common/Menu.h
-    winbrick/winbrick_ver8.h
+	common/Extras.h
+    winbrick/winbrick_ver11.h
 	
     
     winbrick/StandardShading.fragmentshader

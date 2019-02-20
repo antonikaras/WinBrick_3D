@@ -26,6 +26,8 @@ using namespace glm;
 class Ball 
 {
 private:
+//****************	V A R I A B L E S	****************
+
 	// struct used for storing the material coefficients
 	struct Material
 	{
@@ -46,7 +48,7 @@ private:
 	vec3 NewBallPosition(vec3 Pos, vec3 Vel, float dt)
 	{
 		vec3 NewPos;
-		NewPos = Pos + Vel * dt;
+		NewPos = Pos + speed * Vel * dt;
 		return NewPos;
 	}
 
@@ -64,12 +66,12 @@ public:
 	vec3 S = vec3(radius, radius, radius);
 	// transformation matrix
 	mat4 M = mat4(0);
-	// ball velocity
+	// ball velocity direction
 	vec3 V = vec3(0, 0, 0);							//	VELOCITY
 	// ball level affects the damage of the ball 
 	float BallLevel = 1.0f;							// LEVEL		
-	// Ball direction
-	vec3 BallDirection = vec3(0, 0, 1);				//	DIRECTION
+	// Ball speed
+	float speed = 0.5;								// SPEED
 	// Boundary Box dimensions, used to calculate
 	// the limits of the ball movement
 	// minx, maxx, miny, maxy
