@@ -6,7 +6,10 @@
 
 ## Play
 
-    In order to run the game enter winbrick directory and run the winbrick.exe.
-    If this doesn't work try using cmake to build the app and then use the winbrick.exe.
-    Sometimes, the app doesn't launch when it's excecuted on a laptop using the onboard 
-    cpu-graphics card so change it to gpu from windows prefrences.
+    * In order to run the game enter winbrick directory and run the winbrick.exe.
+    * If this doesn't work try using cmake to build the app and then use the winbrick.exe.
+
+## Troubleshooting
+
+    Sometimes, the app doesn't launch when it's excecuted on a laptop using the cpu-graphics
+    card so change it to gpu from windows prefrences.
